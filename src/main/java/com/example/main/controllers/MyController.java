@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,16 +77,38 @@ public class MyController {
         return service.searchByCity(city);
     }
 
+
     @GetMapping("/all")
-    public Page<Student> getAll(
-            @RequestParam int page,
-            @RequestParam int size,
-            @RequestParam String field,
-            @RequestParam String direction){
+    public List<Student> getAll(
+            @RequestParam(required = false,defaultValue = "1") int pageNo,
+            @RequestParam(required = false,defaultValue = "5") int pageSize,
+            @RequestParam(required = false,defaultValue = "id") String sortBy,
+            @RequestParam(required = false,defaultValue = "ASC") String sortDir,
+            @RequestParam(required = false) String search
+    ){
+        Sort sort = null;
+        if(sortDir.equalsIgnoreCase("ASC")){
+            sort = Sort.by(sortBy).ascending();
+        }else{
+            sort = Sort.by(sortBy).descending();
+        }
 
-        return service.getStudent(page,size,field,direction);
-
+        Pageable pageable = PageRequest.of(pageNo-1,pageSize,sort);
+        return service.fetchAllStudent(search,pageable);
     }
+
+
+//
+//    @GetMapping("/all")
+//    public Page<Student> getAll(
+//            @RequestParam int page,
+//            @RequestParam int size,
+//            @RequestParam String field,
+//            @RequestParam String direction){
+//
+//        return service.getStudent(page,size,field,direction);
+//
+//    }
 
 
 

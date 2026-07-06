@@ -81,14 +81,23 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Page<Student> getStudent(int page, int size, String field, String direction) {
-        Sort sort = direction.equalsIgnoreCase("asc")
-                ? Sort.by(field).ascending()
-                : Sort.by(field).descending();
-
-        Pageable pageable = PageRequest.of(page,size,sort);
-        return repo.findAll(pageable);
+    public List<Student> fetchAllStudent(String search, Pageable pageable) {
+        if(search==null || search.isEmpty()){
+            return repo.findAll(pageable).getContent();
+        }else{
+            return repo.findAllByName(search,pageable).getContent();
+        }
     }
+
+//    @Override
+//    public Page<Student> getStudent(int page, int size, String field, String direction) {
+//        Sort sort = direction.equalsIgnoreCase("asc")
+//                ? Sort.by(field).ascending()
+//                : Sort.by(field).descending();
+//
+//        Pageable pageable = PageRequest.of(page,size,sort);
+//        return repo.findAll(pageable);
+//    }
 
 
 }

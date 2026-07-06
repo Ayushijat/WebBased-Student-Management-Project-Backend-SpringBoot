@@ -1,11 +1,11 @@
 package com.example.main.services;
 
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 import com.example.main.entities.Student;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface StudentService {
@@ -29,6 +29,8 @@ public interface StudentService {
     public List<Student> searchByCity(String city);
 
 
-    public Page<Student> getStudent(int page, int size, String field, String direction);
+//    public Page<Student> getStudent(int page, int size, String field, String direction);
+
+    public List<Student> fetchAllStudent(String search, Pageable pageable);
 }
 
