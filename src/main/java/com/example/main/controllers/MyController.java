@@ -2,9 +2,9 @@ package com.example.main.controllers;
 
 import java.util.List;
 
+import com.example.main.dto.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,41 +23,67 @@ public class MyController {
     private StudentService service;
 
     @PostMapping
-    public ResponseEntity<Student> addStudent(@Valid @RequestBody Student student) {
+    public ResponseEntity<ApiResponse> addStudent(@Valid @RequestBody Student student) {
         Student stu = service.addStudent(student);
-        return new ResponseEntity<>(stu, HttpStatus.CREATED);
+        ApiResponse apiResponse = new ApiResponse(
+                true,
+                "Student added Successfully",
+                stu
+        );
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<Student> getAllStudents() {
-        return service.getAllStudents();
+    public ResponseEntity<ApiResponse> getAllStudents() {
+        List<Student> student = service.getAllStudents();
+        ApiResponse response = new ApiResponse(
+                true,
+                "Student Retrived Successfully",
+                student
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable int id) {
+    public ResponseEntity<ApiResponse> getStudentById(@PathVariable int id) {
         Student std =  service.getStudentById(id);
 
         if(std!=null) {
-            return ResponseEntity.ok().body(std);
+            ApiResponse response = new ApiResponse(
+                    true,
+                    "Student Found",
+                    std
+            );
+            return ResponseEntity.ok(response);
         }else {
             return ResponseEntity.notFound().build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Student> UpdateStudent(@PathVariable int id,@Valid @RequestBody Student stu){
+    public ResponseEntity<ApiResponse> UpdateStudent(@PathVariable int id,@Valid @RequestBody Student stu){
         Student stuData = service.updateStudent(id, stu);
         if(stuData!=null) {
-            return ResponseEntity.ok(stuData);
+            ApiResponse response = new ApiResponse(
+                    true,
+                    "Student Updated Successfully",
+                    stuData
+            );
+            return ResponseEntity.ok(response);
         }else {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteStudent(@PathVariable int id) {
+    public ResponseEntity<ApiResponse> deleteStudent(@PathVariable int id) {
         service.deleteStudent(id);
-        return ResponseEntity.ok("Deleted Successfully");
+        ApiResponse response = new ApiResponse(
+                true,
+                "Student Deleted Successfully",
+                null
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/name/{name}")

@@ -1,5 +1,6 @@
 package com.example.main.controllers;
 
+import com.example.main.dto.ApiResponse;
 import com.example.main.dto.AuthResponse;
 import com.example.main.dto.LoginRequest;
 import com.example.main.dto.SignUpRequest;
@@ -23,18 +24,36 @@ public class AuthController {
     private StudentService service;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody SignUpRequest request){
-        return new ResponseEntity<>(service.signup(request), HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignUpRequest request){
+        String message = service.signup(request);
+        ApiResponse response = new ApiResponse(
+                true,
+                message,
+                null
+        );
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
-        return ResponseEntity.ok(service.login(request));
+    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest request){
+        AuthResponse authResponse = service.login(request);
+        ApiResponse response = new ApiResponse(
+                true,
+                "Login Successfully",
+                authResponse
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(){
-        return ResponseEntity.ok(service.logout());
+    public ResponseEntity<ApiResponse> logout(){
+        String message = service.logout();
+        ApiResponse response = new ApiResponse(
+                true,
+                message,
+                null
+        );
+        return ResponseEntity.ok(response);
     }
 
 }
