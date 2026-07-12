@@ -1,59 +1,54 @@
-
-package com.example.main.entities;
+package com.example.main.dto;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-@Entity
-@Table
-public class Student {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
-    private int id;
-
-    @Column
+public class SignUpRequest {
     @NotBlank(message = "Name is required")
+    @Size(min = 2, message = "Name must be at least 2 character")
     private String name;
 
-    @Column
     @Min(value = 1, message = "Roll Number should be greater than 0")
     private int rollno;
 
-    @Column(unique = true)
-    @Email(message = "Invalid Email")
     @NotBlank(message = "Email is required")
+    @Email(message = "Invalid Email")
     private String email;
 
-    @Column
     @NotBlank(message = "Password is required")
     @Size(min = 6,message = "Password must be at least 6 character")
     private String password;
 
-    @Column
-    @NotBlank(message = "department is required")
+    @NotBlank(message = "Department is required")
     private String department;
 
-    @Column
-    @NotBlank(message = "course is required")
+    @NotBlank(message = "Course is required")
     private String course;
 
-    @Column
-    @NotBlank(message = "city is required")
+    @NotBlank(message = "Name is required")
     private String city;
 
-    @NotBlank(message = "gender is required")
-    @Column
+    @NotBlank(message = "Gender is required")
     private String gender;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getRollno() {
+        return rollno;
+    }
+
+    public void setRollno(int rollno) {
+        this.rollno = rollno;
+    }
 
     public String getEmail() {
         return email;
@@ -95,30 +90,6 @@ public class Student {
         this.gender = gender;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getRollno() {
-        return rollno;
-    }
-
-    public void setRollno(int rollno) {
-        this.rollno = rollno;
-    }
-
     public String getPassword() {
         return password;
     }
@@ -127,4 +98,3 @@ public class Student {
         this.password = password;
     }
 }
-

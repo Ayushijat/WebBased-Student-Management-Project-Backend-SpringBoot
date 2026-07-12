@@ -22,5 +22,9 @@ public interface StudentRepository extends JpaRepository<Student,Integer> {
 
     Page<Student> findAllByName(String search, Pageable pageable);
 
+    Optional<Student> findStuByEmail(String email);
+
+    boolean existsByEmail(String email);
+
 }
 

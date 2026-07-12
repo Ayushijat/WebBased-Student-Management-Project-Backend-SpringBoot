@@ -2,15 +2,17 @@ package com.example.main.controllers;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-        import com.example.main.entities.Student;
+import com.example.main.entities.Student;
 import com.example.main.services.StudentService;
 
 @RestController
@@ -21,8 +23,9 @@ public class MyController {
     private StudentService service;
 
     @PostMapping
-    public Student addStudent(@RequestBody Student student) {
-        return service.addStudent(student);
+    public ResponseEntity<Student> addStudent(@Valid @RequestBody Student student) {
+        Student stu = service.addStudent(student);
+        return new ResponseEntity<>(stu, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -42,7 +45,7 @@ public class MyController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Student> UpdateStudent(@PathVariable int id,@RequestBody Student stu){
+    public ResponseEntity<Student> UpdateStudent(@PathVariable int id,@Valid @RequestBody Student stu){
         Student stuData = service.updateStudent(id, stu);
         if(stuData!=null) {
             return ResponseEntity.ok(stuData);
@@ -52,9 +55,9 @@ public class MyController {
     }
 
     @DeleteMapping("/{id}")
-    public String deleteStudent(@PathVariable int id) {
+    public ResponseEntity<String> deleteStudent(@PathVariable int id) {
         service.deleteStudent(id);
-        return "Deleted Successfully";
+        return ResponseEntity.ok("Deleted Successfully");
     }
 
     @GetMapping("/name/{name}")

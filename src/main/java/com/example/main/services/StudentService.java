@@ -3,6 +3,9 @@ package com.example.main.services;
 
 import java.util.List;
 
+import com.example.main.dto.AuthResponse;
+import com.example.main.dto.LoginRequest;
+import com.example.main.dto.SignUpRequest;
 import com.example.main.entities.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,8 +32,13 @@ public interface StudentService {
     public List<Student> searchByCity(String city);
 
 
-//    public Page<Student> getStudent(int page, int size, String field, String direction);
-
     public List<Student> fetchAllStudent(String search, Pageable pageable);
+
+    String signup(SignUpRequest request);
+
+    AuthResponse login(LoginRequest request);
+
+    String logout();
+
 }
 
