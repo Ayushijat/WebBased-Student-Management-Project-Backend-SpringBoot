@@ -1,45 +1,43 @@
 package com.example.main.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class SignUpRequest {
+public class StudentRequestDTO {
 
-    @Id
     private Integer id;
 
     @NotBlank(message = "Name is required")
-    @Size(min = 2, message = "Name must be at least 2 character")
     private String name;
 
     @Min(value = 1, message = "Roll Number should be greater than 0")
     private int rollno;
 
-    @NotBlank(message = "Email is required")
     @Email(message = "Invalid Email")
+    @NotBlank(message = "Email is required")
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 6,message = "Password must be at least 6 character")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    @NotBlank(message = "Department is required")
+    private String mobileNo;
+
+    @NotBlank
     private String department;
 
-    @NotBlank(message = "Course is required")
+    @NotBlank
     private String course;
 
-    @NotBlank(message = "Name is required")
+    @NotBlank
     private String city;
 
-    @NotBlank(message = "Gender is required")
+    @NotBlank
     private String gender;
 
-    private String mobileNo;
+    private Integer roleId;
 
     public Integer getId() {
         return id;
@@ -47,14 +45,6 @@ public class SignUpRequest {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getMobileNo() {
-        return mobileNo;
-    }
-
-    public void setMobileNo(String mobileNo) {
-        this.mobileNo = mobileNo;
     }
 
     public String getName() {
@@ -79,6 +69,22 @@ public class SignUpRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getMobileNo() {
+        return mobileNo;
+    }
+
+    public void setMobileNo(String mobileNo) {
+        this.mobileNo = mobileNo;
     }
 
     public String getDepartment() {
@@ -113,11 +119,11 @@ public class SignUpRequest {
         this.gender = gender;
     }
 
-    public String getPassword() {
-        return password;
+    public Integer getRoleId() {
+        return roleId;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
 }

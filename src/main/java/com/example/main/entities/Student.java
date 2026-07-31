@@ -1,25 +1,22 @@
 
 package com.example.main.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table
 public class Student {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
-    private int id;
+    @Column(nullable = false)
+    private Integer id;
 
     @Column
     @NotBlank(message = "Name is required")
@@ -40,6 +37,14 @@ public class Student {
     private String password;
 
     @Column
+    private String mobileNo;
+
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
+
+    @Column
     @NotBlank(message = "department is required")
     private String department;
 
@@ -54,6 +59,38 @@ public class Student {
     @NotBlank(message = "gender is required")
     @Column
     private String gender;
+
+    @Column
+    private String status = "Active";
+
+    @Column
+    private LocalDateTime createdDate;
+
+
+    @PrePersist
+    public void onCreate() {
+        createdDate = LocalDateTime.now();
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
 
     public String getEmail() {
         return email;
@@ -95,13 +132,11 @@ public class Student {
         this.gender = gender;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+
 
     public String getName() {
         return name;
@@ -126,5 +161,23 @@ public class Student {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getMobileNo() {
+        return mobileNo;
+    }
+
+    public void setMobileNo(String mobileNo) {
+        this.mobileNo = mobileNo;
+    }
+
+
 }
 

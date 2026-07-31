@@ -1,9 +1,6 @@
 package com.example.main.controllers;
 
-import com.example.main.dto.ApiResponse;
-import com.example.main.dto.AuthResponse;
-import com.example.main.dto.LoginRequest;
-import com.example.main.dto.SignUpRequest;
+import com.example.main.dto.*;
 import com.example.main.entities.Student;
 import com.example.main.services.StudentService;
 import jakarta.validation.Valid;
@@ -11,11 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -53,6 +48,26 @@ public class AuthController {
                 message,
                 null
         );
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse> refreshToken(
+            @RequestBody RefreshTokenRequest request
+    ) {
+
+        AuthResponse authResponse =
+                service.refreshToken(
+                        request.getRefreshToken()
+                );
+
+        ApiResponse response =
+                new ApiResponse(
+                        true,
+                        "Token refreshed successfully",
+                        authResponse
+                );
+
         return ResponseEntity.ok(response);
     }
 

@@ -10,11 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.example.main.dto.StudentRequestDTO;
 
 import com.example.main.entities.Student;
 import com.example.main.services.StudentService;
-
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/student")
 public class MyController {
@@ -23,14 +25,22 @@ public class MyController {
     private StudentService service;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> addStudent(@Valid @RequestBody Student student) {
-        Student stu = service.addStudent(student);
+    public ResponseEntity<ApiResponse> addStudent(
+            @Valid @RequestBody StudentRequestDTO request
+    ) {
+
+        Student stu = service.addStudent(request);
+
         ApiResponse apiResponse = new ApiResponse(
                 true,
                 "Student added Successfully",
                 stu
         );
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+
+        return new ResponseEntity<>(
+                apiResponse,
+                HttpStatus.CREATED
+        );
     }
 
     @GetMapping
@@ -113,7 +123,8 @@ public class MyController {
             @RequestParam(required = false,defaultValue = "5") int pageSize,
             @RequestParam(required = false,defaultValue = "id") String sortBy,
             @RequestParam(required = false,defaultValue = "ASC") String sortDir,
-            @RequestParam(required = false) String search
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status
     ){
         Sort sort = null;
         if(sortDir.equalsIgnoreCase("ASC")){
@@ -123,7 +134,45 @@ public class MyController {
         }
 
         Pageable pageable = PageRequest.of(pageNo-1,pageSize,sort);
-        return service.fetchAllStudent(search,pageable);
+        return service.fetchAllStudent(search,status,pageable);
+    }
+
+    @GetMapping("/count")
+    public long getTotalStudents() {
+        return service.getTotalStudents();
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse> getProfile(
+            Authentication authentication
+    ) {
+
+        String email = authentication.getName();
+
+        Student student =
+                service.getProfile(email);
+
+        ApiResponse response =
+                new ApiResponse(
+                        true,
+                        "Profile fetched successfully",
+                        student
+                );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<ApiResponse> updateProfile(@RequestBody Student student, Authentication authentication){
+        String email = authentication.getName();
+
+        Student updateStudent = service.updateOwnProfile(email,student);
+        ApiResponse response = new ApiResponse(
+                true,
+                "Profile Updated Successfully",
+                updateStudent
+        );
+        return ResponseEntity.ok(response);
     }
 
 
