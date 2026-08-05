@@ -1,11 +1,10 @@
 package com.example.main.services;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import com.example.main.dto.AuthResponse;
-import com.example.main.dto.LoginRequest;
-import com.example.main.dto.SignUpRequest;
+import com.example.main.dto.*;
 import com.example.main.entities.Role;
 import com.example.main.repository.RoleRepository;
 import com.example.main.security.JwtService;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.main.entities.Student;
 import com.example.main.repository.StudentRepository;
-import com.example.main.dto.StudentRequestDTO;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -32,6 +30,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public Student addStudent(StudentRequestDTO request) {
@@ -70,61 +71,75 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<Student> getAllStudents() {
 
-        return repo.findAll();
+        return repo.findByIsDeletedFalse();
     }
 
     @Override
     public Student getStudentById(int id) {
 
-        return repo.findById(id).orElse(null);
+        Student student = repo.findById(id)
+                .orElseThrow(()->new RuntimeException("invalid Id"));
+
+        if(student.isDeleted()){
+            throw new RuntimeException("Student Not found");
+        }
+
+        return student;
     }
 
     @Override
     public Student updateStudent(int id,Student stu) {
 
-        Student stuData = repo.findById(id).orElse(null);
-        if(stuData!=null) {
-            stuData.setName(stu.getName());
-            stuData.setRollno(stu.getRollno());
-            stuData.setCity(stu.getCity());
-            stuData.setCourse(stu.getCourse());
-            stuData.setDepartment(stu.getDepartment());
-            stuData.setEmail(stu.getEmail());
-            stuData.setGender(stu.getGender());
-            stuData.setPassword(stu.getPassword());
-            stuData.setStatus(stu.getStatus());
-            stuData.setMobileNo(stu.getMobileNo());
+        Student stuData = repo.findById(id).orElseThrow(
+                ()->new RuntimeException("Student not Found"));
+        if(stuData.isDeleted()){
+            throw new RuntimeException("Student is deleted");
 
-            return repo.save(stuData);
-        }else {
-            throw new RuntimeException("Student not found with the id "+id);
         }
+        stuData.setName(stu.getName());
+        stuData.setRollno(stu.getRollno());
+        stuData.setCity(stu.getCity());
+        stuData.setCourse(stu.getCourse());
+        stuData.setDepartment(stu.getDepartment());
+        stuData.setEmail(stu.getEmail());
+        stuData.setGender(stu.getGender());
+        stuData.setPassword(stu.getPassword());
+        stuData.setStatus(stu.getStatus());
+        stuData.setMobileNo(stu.getMobileNo());
+
+        return repo.save(stuData);
+
     }
 
     @Override
     public void deleteStudent(int id) {
-        repo.deleteById(id);
+        Student student=repo.findById(id)
+                .orElseThrow(()->new RuntimeException("Student not found"));
+
+        student.setDeleted(true);
+        student.setStatus("Inactive");
+        repo.save(student);
 
     }
 
     @Override
     public List<Student> searchByName(String name) {
-        return repo.findByName(name);
+        return repo.findByNameAndIsDeletedFalse(name);
     }
 
     @Override
     public List<Student> searchByEmail(String email) {
-        return repo.findByEmail(email);
+        return repo.findByEmailAndIsDeletedFalse(email);
     }
 
     @Override
     public List<Student> searchByDepartment(String department) {
-        return repo.findByDepartment(department);
+        return repo.findByDepartmentAndIsDeletedFalse(department);
     }
 
     @Override
     public List<Student> searchByCity(String city) {
-        return repo.findByCity(city);
+        return repo.findByCityAndIsDeletedFalse(city);
     }
 
     @Override
@@ -138,16 +153,19 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public long getTotalStudents() {
-        return repo.count();
+        return repo.countByIsDeletedFalse();
     }
 
     @Override
     public Student getProfile(String email) {
 
-        return repo.findStuByEmail(email)
-                .orElseThrow(
-                        () -> new RuntimeException("User not found")
-                );
+        Student student = repo.findStuByEmail(email)
+                .orElseThrow(()->new RuntimeException("User not found"));
+
+        if(student.isDeleted()){
+            throw new RuntimeException("Account Deactivated");
+        }
+        return student;
     }
 
     @Override
@@ -211,6 +229,9 @@ public class StudentServiceImpl implements StudentService {
                 .orElseThrow(
                         () -> new RuntimeException("Student Not Found")
                 );
+        if(existingStudent.isDeleted()){
+            throw new RuntimeException("Account Deactivated");
+        }
         existingStudent.setName(updateData.getName());
         existingStudent.setMobileNo(updateData.getMobileNo());
         existingStudent.setCourse(updateData.getCourse());
@@ -220,6 +241,106 @@ public class StudentServiceImpl implements StudentService {
 
         return repo.save(existingStudent);
     }
+
+    @Override
+    public Student uploadProfilePhoto(String email, String photoName) {
+        Student student = repo.findStuByEmail(email)
+                .orElseThrow(()-> new RuntimeException("Student not found"));
+        if(student.isDeleted()){
+            throw new RuntimeException("Account Deactivated");
+        }
+        student.setProfilePhoto(photoName);
+        return repo.save(student);
+    }
+
+    @Override
+    public String changePassword(String email, ChangePasswordRequest request) {
+        Student student = repo.findStuByEmail(email)
+                .orElseThrow(()->new RuntimeException("user not found"));
+        if(student.isDeleted()){
+            throw new RuntimeException("Account Deactivated");
+        }
+
+        if(!passwordEncoder.matches(
+                request.getCurrentPassword(),
+                student.getPassword())){
+            throw new RuntimeException("Current Password is incorect");
+        }
+
+        if(!request.getNewPassword().equals(request.getConfirmPassword())){
+            throw new RuntimeException("New password and confirm password do not matched");
+
+        }
+
+        student.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        repo.save(student);
+        return "Password changed Successfully";
+    }
+
+    @Override
+    public void forgotPassword(String email) {
+        Student student = repo.findStuByEmail(email)
+                .orElseThrow(()->new RuntimeException("Email not found"));
+        if(student.isDeleted()){
+            throw new RuntimeException("Account Deactivated");
+        }
+
+        String otp = String.valueOf(
+                (int) ((Math.random()*900000)+100000)
+        );
+        student.setOtp(otp);
+        student.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+        repo.save(student);
+
+        emailService.sendOtp(email,otp);
+    }
+
+    @Override
+    public void resetPassword(String email, String otp, String newPassword) {
+        Student student = repo.findStuByEmail(email)
+                .orElseThrow(()->new RuntimeException("email not found"));
+        if(student.isDeleted()){
+            throw new RuntimeException("Account Deactivated");
+        }
+
+        if(!student.getOtp().equals(otp)){
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        if(student.getOtpExpiry().isBefore(LocalDateTime.now())){
+            throw new RuntimeException("OTP Expired");
+
+        }
+        student.setPassword(passwordEncoder.encode(newPassword));
+        student.setOtp(null);
+        student.setOtpExpiry(null);
+        repo.save(student);
+    }
+
+    @Override
+    public boolean verifyOtp(String email, String otp) {
+        Student student = repo.findStuByEmail(email)
+                .orElseThrow(()->new RuntimeException("Email not found"));
+        if(student.isDeleted()){
+            throw new RuntimeException("Account Deactivated");
+        }
+
+        if(!student.getOtp().equals(otp)){
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        if(student.getOtpExpiry().isBefore(LocalDateTime.now())){
+            throw new RuntimeException("OTP Expired");
+        }
+
+        return true;
+    }
+
+    @Override
+    public long getInactiveStudentsCount() {
+        return repo.countByStatusAndIsDeletedTrue("Inactive");
+    }
+
 
     @Override
     public String signup(SignUpRequest request) {
@@ -274,6 +395,11 @@ public class StudentServiceImpl implements StudentService {
     public AuthResponse login(LoginRequest request) {
         Student student = repo.findStuByEmail(request.getEmail())
                 .orElseThrow(()->new RuntimeException("Invalid Email"));
+
+        if(student.isDeleted()){
+            throw new RuntimeException("Your account has been deactivated.");
+        }
+
         if(!passwordEncoder.matches(request.getPassword(),student.getPassword())){
             throw new RuntimeException("Invalid Password");
         }

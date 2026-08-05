@@ -109,13 +109,23 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/auth/login",
                                         "/api/auth/signup",
-                                        "/api/auth/refresh"
+                                        "/api/auth/refresh",
+                                        "/student/forgot-password",
+                                        "/student/verify-otp",
+                                        "/student/reset-password",
+                                        "/uploads/**"
                                 )
                                 .permitAll()
 
 
 
                                 // Admin only
+
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/student/inactive-count"
+                                )
+                                .hasRole("ADMIN")
 
                                 .requestMatchers(
                                         HttpMethod.POST,
@@ -126,7 +136,8 @@ public class SecurityConfig {
                                 // Profile APIs
                                 .requestMatchers(
                                         HttpMethod.PUT,
-                                        "/student/profile"
+                                        "/student/profile",
+                                        "/student/change-password"
                                 )
                                 .hasAnyRole("ADMIN", "USER")
 
@@ -141,6 +152,7 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         HttpMethod.DELETE,
                                         "/student/**"
+
                                 )
                                 .hasRole("ADMIN")
 

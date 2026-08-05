@@ -66,6 +66,49 @@ public class Student {
     @Column
     private LocalDateTime createdDate;
 
+    @Column(length = 6)
+    private String otp;
+
+    @Column
+    private LocalDateTime otpExpiry;
+
+    @Column
+    private String profilePhoto;
+
+    @Column(name = "is_deleted",nullable = false)
+    private boolean isDeleted = false;
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public String getOtp() {
+        return otp;
+    }
+
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
+
+    public LocalDateTime getOtpExpiry() {
+        return otpExpiry;
+    }
+
+    public void setOtpExpiry(LocalDateTime otpExpiry) {
+        this.otpExpiry = otpExpiry;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
+    }
 
     @PrePersist
     public void onCreate() {

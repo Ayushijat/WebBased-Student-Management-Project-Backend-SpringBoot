@@ -31,6 +31,8 @@ public interface StudentRepository extends JpaRepository<Student,Integer> {
     @Query("""
     SELECT s FROM Student s
     WHERE
+    s.isDeleted = false
+    AND
     (:search IS NULL OR
      LOWER(s.name) LIKE LOWER(CONCAT('%', :search, '%')))
     AND
@@ -52,7 +54,18 @@ public interface StudentRepository extends JpaRepository<Student,Integer> {
     long countByRoleName(@Param("roleName") String roleName);
 
 
+    List<Student> findByIsDeletedFalse();
 
+    long countByIsDeletedFalse();
 
+    List<Student> findByNameAndIsDeletedFalse(String name);
+
+    List<Student> findByEmailAndIsDeletedFalse(String email);
+
+    List<Student> findByDepartmentAndIsDeletedFalse(String department);
+
+    List<Student> findByCityAndIsDeletedFalse(String city);
+
+    long countByStatusAndIsDeletedTrue(String status);
 }
 

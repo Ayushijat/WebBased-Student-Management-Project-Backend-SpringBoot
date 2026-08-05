@@ -2,7 +2,8 @@ package com.example.main.controllers;
 
 import java.util.List;
 
-import com.example.main.dto.ApiResponse;
+import com.example.main.dto.*;
+import com.example.main.services.FileStorageService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -12,10 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import com.example.main.dto.StudentRequestDTO;
 
 import com.example.main.entities.Student;
 import com.example.main.services.StudentService;
+import org.springframework.web.multipart.MultipartFile;
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/student")
@@ -23,6 +25,9 @@ public class MyController {
 
     @Autowired
     private StudentService service;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @PostMapping
     public ResponseEntity<ApiResponse> addStudent(
@@ -175,20 +180,88 @@ public class MyController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/profile/photo")
+    public ResponseEntity<ApiResponse> uploadProfilePhoto(
+            @RequestParam("file")MultipartFile file,
+            Authentication authentication
+            ){
+        String email = authentication.getName();
+        String fileName = fileStorageService.saveFile(file);
+        Student student = service.uploadProfilePhoto(email,fileName);
+        ApiResponse response = new ApiResponse(
+                true,
+                "profile photo uploads Successfully",
+                student
+        );
+        return ResponseEntity.ok(response);
+    }
 
-//
-//    @GetMapping("/all")
-//    public Page<Student> getAll(
-//            @RequestParam int page,
-//            @RequestParam int size,
-//            @RequestParam String field,
-//            @RequestParam String direction){
-//
-//        return service.getStudent(page,size,field,direction);
-//
-//    }
+    @PutMapping("/change-password")
+    public ResponseEntity<ApiResponse> changePassword(
+            @RequestBody ChangePasswordRequest request,
+            Authentication authentication){
 
+        String email = authentication.getName();
+        String message = service.changePassword(email,request);
+        ApiResponse response = new ApiResponse(
+                true,
+                message,
+                null
+        );
+        return ResponseEntity.ok(response);
+    }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request){
 
+        service.forgotPassword((request.getEmail()));
+        ApiResponse response = new ApiResponse(
+                true,
+                "OTP sent Successfully",
+                null
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ApiResponse> verifyOtp(
+            @Valid @RequestBody VerifyOtpRequest request
+            ){
+        service.verifyOtp(
+                request.getEmail(),
+                request.getOtp()
+        );
+        ApiResponse response = new ApiResponse(
+                true,
+                "OTP verified successfully",
+                null
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request
+    ){
+        service.resetPassword(
+                request.getEmail(),
+                request.getOtp(),
+                request.getNewPassword()
+        );
+
+        ApiResponse response = new ApiResponse(
+                true,
+                "Password Reset Successfully",
+                null
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/inactive-count")
+    public ResponseEntity<Long> getInactiveStudentsCount(){
+        System.out.println("Inactive Count API Called");
+        return ResponseEntity.ok(service.getInactiveStudentsCount());
+    }
 
 }

@@ -3,12 +3,8 @@ package com.example.main.services;
 
 import java.util.List;
 
-import com.example.main.dto.AuthResponse;
-import com.example.main.dto.LoginRequest;
-import com.example.main.dto.SignUpRequest;
-import com.example.main.dto.StudentRequestDTO;
+import com.example.main.dto.*;
 import com.example.main.entities.Student;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
@@ -48,6 +44,18 @@ public interface StudentService {
     AuthResponse refreshToken(String refreshToken);
 
     Student updateOwnProfile(String email, Student student);
+
+    Student uploadProfilePhoto(String email, String photoName);
+
+    String changePassword(String email, ChangePasswordRequest request);
+
+    void forgotPassword(String email);
+
+    void resetPassword(String email,String otp,String newPassword);
+
+    boolean verifyOtp(String email, String otp);
+
+    long getInactiveStudentsCount();
 
 }
 
